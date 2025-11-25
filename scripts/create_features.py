@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from pathlib import Path
 
 def create_time_feature(df):
     df['Contract date'] = pd.to_datetime(df['Contract date'], errors='coerce')
