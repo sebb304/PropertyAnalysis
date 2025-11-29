@@ -1,18 +1,19 @@
 import pandas as pd
+import re
 
 df = pd.read_csv('/Users/seb/Desktop/Project2/nsw_property_data.csv', low_memory=False)
-
 
 # Convert to date type
 df['Contract date'] = pd.to_datetime(df['Contract date'], errors='coerce')
 df['Settlement date'] = pd.to_datetime(df['Settlement date'], errors='coerce')
 
 # Convert to int
-df['Property post dode'] = df['Property post code'].astype('Int64')
+df['Property post code'] = df['Property post code'].astype('Int64')
 df['Purchase price'] = df['Purchase price'].astype('Int64')
 
 df = df[df['Purchase price'].notna()]
 df = df[df['Purchase price'] > 0]
+df = df[df['Property post code'].notna()]
 
 # Standardise the street names
 df['Property street name'] = (
@@ -32,22 +33,21 @@ df['Address'] = (
     df['Property locality'].fillna('').astype(str)
 ).str.strip().str.upper()
 
-df['LGA_ID'] = (
-    df['Property legal description'].fillna('') + '|' +
-    df["Address"]
-)
+df = df.drop_duplicates()
 
-df = df.drop_duplicates(
-    subset=['LGA_ID', 'Contract date', 'Purchase price'],
-    keep='first'
-)
+# Cleans locality data
+df['Property locality'] = df['Property locality'].astype(str)
+df['Property locality'] = df['Property locality'].str.strip().str.upper()
+df['Property locality'] = df['Property locality'].str.replace(r'\s+', ' ', regex=True)
+df['Property locality'] = df['Property locality'].str.replace(r'[^\w\s]', '', regex=True)
+df['Property locality'] = df['Property locality'].replace("NAN", pd.NA)
+df['Property locality'] = df['Property locality'].apply(lambda x: x if len(str(x)) > 2 else pd.NA)
+df['Property locality'] = df['Property locality'].str.replace(r'\d+', '', regex=True)
+
 
 # Extracts time data from contract date
 df['Year'] = df['Contract date'].dt.year
 df['Month'] = df['Contract date'].dt.to_period('M')
 df['Quarter'] = df['Contract date'].dt.to_period('Q')
-
-# Removes entries with location missing
-df[df['Property locality'].isna() | df['Property post code'].isna()]
 
 df.to_parquet('data/nsw_property_cleaned.parquet')
