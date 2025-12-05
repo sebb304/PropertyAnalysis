@@ -55,6 +55,12 @@ df = df.dropna(subset=['Primary purpose'])
 df = df[df['Primary purpose'].isin(df['Primary purpose'].value_counts()[lambda x: x >= 20000].index)]
 
 # Remove purchase price outliers
-
+group_medians = (
+    df.groupby(['Property post code', 'Primary purpose'])['Purchase price'].median()
+)
+df['group_median_price'] = df.set_index(['Property post code', 'Primary purpose']).index.map(group_medians)
+df = df[df['Purchase price'] < df['group_median_price'] * 10]
+df = df[df['Purchase price'] > df['group_median_price'] * 0.1]
+df = df.drop(columns=['group_median_price'])
 
 df.to_parquet('data/nsw_property_cleaned.parquet')
