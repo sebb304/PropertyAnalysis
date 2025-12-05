@@ -50,4 +50,11 @@ df['Year'] = df['Contract date'].dt.year
 df['Month'] = df['Contract date'].dt.to_period('M')
 df['Quarter'] = df['Contract date'].dt.to_period('Q')
 
+# Organise primary purpose of properties
+df = df.dropna(subset=['Primary purpose'])
+df = df[df['Primary purpose'].isin(df['Primary purpose'].value_counts()[lambda x: x >= 20000].index)]
+
+# Remove purchase price outliers
+
+
 df.to_parquet('data/nsw_property_cleaned.parquet')
