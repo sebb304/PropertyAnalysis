@@ -62,5 +62,6 @@ quantiles.columns = ['q01', 'q99']
 df = df.merge(quantiles, on=['Property post code', 'Primary purpose', 'Year'], how='left')
 df = df[(df['Purchase price'] >= df['q01']) & (df['Purchase price'] <= df['q99'])]
 df = df.drop(columns=['q01', 'q99'])
+df = df[df['Year'] >= 2000]
 
 df.to_parquet('data/nsw_property_cleaned.parquet')
