@@ -35,7 +35,7 @@ def create_price_feature(df):
     return df
 
 def create_suburb_activity_feature(df):
-    df['surburb_sales_per_year'] = (
+    df['suburb_sales_per_year'] = (
         df.groupby(['Property locality', 'sale_year'])['Purchase price']
         .transform('count')
     )
